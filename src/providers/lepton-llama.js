@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class LeptonLlama extends Provider {
 	static webviewId = 'webiewLeptonLlama';
@@ -96,4 +96,7 @@ class LeptonLlama extends Provider {
 	}
 }
 
-module.exports = LeptonLlama;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = LeptonLlama;
+}
+export default LeptonLlama;

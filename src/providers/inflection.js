@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class InflectionPi extends Provider {
 	static webviewId = 'webviewInflection';
@@ -51,4 +51,7 @@ class InflectionPi extends Provider {
 	}
 }
 
-module.exports = InflectionPi;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = InflectionPi;
+}
+export default InflectionPi;

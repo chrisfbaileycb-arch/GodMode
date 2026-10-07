@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class YouChat extends Provider {
 	static webviewId = 'webviewYoudotcom';
@@ -47,4 +47,7 @@ class YouChat extends Provider {
 	}
 }
 
-module.exports = YouChat;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = YouChat;
+}
+export default YouChat;

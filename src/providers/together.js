@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class Together extends Provider {
 	static webviewId = 'webviewTOGETHER';
@@ -64,4 +64,7 @@ class Together extends Provider {
 	}
 }
 
-module.exports = Together;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = Together;
+}
+export default Together;

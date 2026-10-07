@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class HuggingChat extends Provider {
 	static webviewId = 'webviewHuggingChat';
@@ -78,4 +78,7 @@ class HuggingChat extends Provider {
 	}
 }
 
-module.exports = HuggingChat;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = HuggingChat;
+}
+export default HuggingChat;

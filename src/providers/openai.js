@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class OpenAI extends Provider {
 	static webviewId = 'webviewOAI';
@@ -67,4 +67,7 @@ class OpenAI extends Provider {
 	}
 }
 
-module.exports = OpenAI;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = OpenAI;
+}
+export default OpenAI;

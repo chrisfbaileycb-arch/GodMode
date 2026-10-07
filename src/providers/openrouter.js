@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class OpenRouter extends Provider {
 	static webviewId = 'webviewOpenRouter';
@@ -53,4 +53,7 @@ class OpenRouter extends Provider {
 	}
 }
 
-module.exports = OpenRouter;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = OpenRouter;
+}
+export default OpenRouter;

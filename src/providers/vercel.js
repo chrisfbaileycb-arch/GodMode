@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class Vercel extends Provider {
 	static webviewId = 'webviewVercelAI';
@@ -55,4 +55,7 @@ class Vercel extends Provider {
 	}
 }
 
-module.exports = Vercel;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = Vercel;
+}
+export default Vercel;

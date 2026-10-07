@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class Poe extends Provider {
 	static webviewId = 'webviewPoe';
@@ -52,4 +52,7 @@ class Poe extends Provider {
 	}
 }
 
-module.exports = Poe;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = Poe;
+}
+export default Poe;

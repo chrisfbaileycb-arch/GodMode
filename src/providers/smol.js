@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class SmolTalk extends Provider {
 	static webviewId = 'webviewSMOL';
@@ -78,4 +78,7 @@ class SmolTalk extends Provider {
 	}
 }
 
-module.exports = SmolTalk;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = SmolTalk;
+}
+export default SmolTalk;

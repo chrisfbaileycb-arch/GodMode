@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class StableChat extends Provider {
 	static webviewId = 'webviewStableChat';
@@ -65,4 +65,7 @@ class StableChat extends Provider {
 	}
 }
 
-module.exports = StableChat;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = StableChat;
+}
+export default StableChat;

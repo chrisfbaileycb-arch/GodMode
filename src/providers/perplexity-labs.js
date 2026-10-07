@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class PerplexityLabs extends Provider {
 	static webviewId = 'webiewPerplexityLabs';
@@ -101,4 +101,7 @@ class PerplexityLabs extends Provider {
 	}
 }
 
-module.exports = PerplexityLabs;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = PerplexityLabs;
+}
+export default PerplexityLabs;

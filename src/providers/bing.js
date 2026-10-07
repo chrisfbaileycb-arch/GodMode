@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class Bing extends Provider {
 	static webviewId = 'webviewBING';
@@ -162,4 +162,7 @@ class Bing extends Provider {
 	}
 }
 
-module.exports = Bing;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = Bing;
+}
+export default Bing;

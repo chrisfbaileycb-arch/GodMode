@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class Falcon180BSpace extends Provider {
 	static webviewId = 'webviewFalcon180BSpace';
@@ -68,4 +68,7 @@ class Falcon180BSpace extends Provider {
 	}
 }
 
-module.exports = Falcon180BSpace;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = Falcon180BSpace;
+}
+export default Falcon180BSpace;

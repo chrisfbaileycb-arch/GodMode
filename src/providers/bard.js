@@ -1,4 +1,4 @@
-const Provider = require('./provider');
+import Provider from './provider';
 
 class Bard extends Provider {
 	static webviewId = 'webviewBARD';
@@ -102,4 +102,7 @@ class Bard extends Provider {
 	}
 }
 
-module.exports = Bard;
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = Bard;
+}
+export default Bard;
