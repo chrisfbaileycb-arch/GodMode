@@ -1,145 +1,166 @@
+import React, { useState } from 'react';
 import { SparklesIcon } from '@heroicons/react/20/solid';
-
-// @ts-ignore
-import vex from 'vex-js';
-// Main css
-import 'vex-js/dist/css/vex.css';
-// Themes (Import all themes you want to use here)
-import 'vex-js/dist/css/vex-theme-default.css';
-import 'vex-js/dist/css/vex-theme-os.css';
-vex.registerPlugin(require('vex-dialog'));
-vex.defaultOptions.className = 'vex-theme-os';
-
-function _promptCritic(originalPrompt: string) {
-	return `I need to improve the original prompt: 
-  
-  --- Original Prompt ---
-  ${originalPrompt}
-  --- End Original Prompt ---
-
-  There are known ways to improve prompts for better LLM performance.
-  Can you please briefly list ways to improve (3 <ol> <li> bullet points with <b>bolded headings</b> per bullet) and then suggest one improved prompt?
-	Do not attempt to answer the prompt yourself.
-  `;
-	// , for example adding "Let's think step by step to get to the right answer" or adding comments before each line of code.
-}
-
-function _promptImprover(originalPrompt: string, modifyInstructions?: string) {
-	return `I need to add more detail to the original prompt: 
-  
-  --- Original Prompt ---
-  ${originalPrompt}
-  --- End Original Prompt ---
-
-  ${
-		modifyInstructions
-			? `My modification instructions are: ${modifyInstructions}`
-			: ''
-	}
-  Please suggest a newer, more detailed (still <300 words) version of this prompt that improves LLM performance. 
-  Do not preface with any conversation or small talk, only reply with the improved prompt.
-  `;
-
-	// For example:
-	// - for general knowledge questions, appending "Let's think step by step to get to the right answer." is known to do well.
-	// - for creative writing, setting temperature=200 and adding exciting adjectives, writing in the style of Hunter S Thompson and Winston Churchill and other well known authors.
-	// - for code generation, first ask for the high level implementation plan in comments, then make sure each non-trivial line of code is preceded by a comment explaining what it does.
-
-	// Do not preface with any conversation or small talk, only reply with the improved prompt.
-	// `;
-}
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from './components/ui/dialog';
+import { Button } from './components/ui/button';
 
 export function PromptCritic(props: {
-	active: boolean;
+	active?: boolean;
 	superprompt: string;
 	setSuperprompt: (p: string) => void;
 }) {
 	const { active, superprompt, setSuperprompt } = props;
-	async function runPromptCritic() {
-		if (superprompt.length < 10) {
-			alert(
-				'superprompt is too short. write a longer one! e.g. "write a receipe for scrambled eggs"',
-			);
+	const [isOpen, setIsOpen] = useState(false);
+	const [loading, setLoading] = useState(false);
+	const [analysis, setAnalysis] = useState<string | null>(null);
+	const [improvedPrompt, setImprovedPrompt] = useState<string>('');
+	const [error, setError] = useState<string | null>(null);
+
+	const handleOpen = () => {
+		setIsOpen(true);
+		setError(null);
+		setAnalysis(null);
+		setImprovedPrompt(superprompt);
+		if (superprompt.trim().length >= 5) {
+			runAnalysis(superprompt);
+		}
+	};
+
+	const runAnalysis = async (promptToAnalyze: string) => {
+		if (!promptToAnalyze || promptToAnalyze.trim().length < 5) {
+			setError('Please enter a longer prompt to analyze (at least 5 characters).');
 			return;
 		}
-		if (superprompt.length > 60) {
-			alert(
-				'superprompt is too long. it can only currently handle low effort prompts. e.g. "write a receipe for scrambled eggs". we are working on extending it to 100k tokens!',
-			);
-			return;
-		}
-		console.log('promptCritic', superprompt);
-		window.electron.browserWindow.promptHiddenChat(_promptCritic(superprompt));
-		var promptChangeStr = await new Promise<string>((res) =>
-			vex.dialog.prompt({
-				unsafeMessage: `
-					<div class="title-bar">
-							<h1>PromptCritic analysis</h1>
-					</div>
-					<div id="streamingPromptResponseContainer">
-					</div>`,
-				placeholder: `Write your new prompt here`,
-				callback: res,
-			}),
-		);
-		if (!promptChangeStr) return;
-		console.log('stage 2 response', promptChangeStr);
 
-		console.log('finalPrompt', promptChangeStr);
-		if (promptChangeStr != null) {
-			setSuperprompt(promptChangeStr);
+		setLoading(true);
+		setError(null);
+		try {
+			const res = await fetch('/api/prompt-critic', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ prompt: promptToAnalyze }),
+			});
+			const data = await res.json();
+			if (data.analysis) {
+				setAnalysis(data.analysis);
+				// Extract suggested prompt if present, or format nicely
+				const suggestionMatch = data.analysis.match(/(?:Suggested Improved Prompt:|Improved version:?)\s*["']?([\s\S]+?)["']?$/i);
+				if (suggestionMatch && suggestionMatch[1]) {
+					setImprovedPrompt(suggestionMatch[1].trim());
+				} else {
+					setImprovedPrompt(promptToAnalyze);
+				}
+			}
+		} catch (err: any) {
+			setError('Failed to analyze prompt. Please try again.');
+		} finally {
+			setLoading(false);
 		}
-		// window.electron.browserWindow.promptHiddenChat(_promptImprover(superprompt, promptChangeStr));
-		// console.log('stage 3 response', prospectivePrompt);
-		// var finalPrompt: string | null = await new Promise((res) =>
-		// 	vex.dialog.prompt({
-		// 		unsafeMessage: `
-		// 			<div class="title-bar">
-		// 					<h1>PromptCritic's Improved suggestion</h1>
-		// 			</div>
-		// 			<div id="streamingPromptResponseContainer">
-		// 			</div>`,
-		// 		// value: prospectivePrompt.responseText,
-		// 		input: `<textarea name="vex" type="text" class="vex-dialog-prompt-input" placeholder="your final prompt"
-		// 		value="${textareavalue}" rows="4">
-		// 		${textareavalue}
-		// 		</textarea>`,
-		// 		placeholder: `your final prompt; copy and paste from above if it helps`,
-		// 		callback: (data: any) => {
-		// 			console.log({ data });
-		// 			if (!data) {
-		// 				console.log('Cancelled');
-		// 			} else {
-		// 				res(data);
-		// 			}
-		// 		},
-		// 	}),
-		// );
+	};
 
-		// const textareavalue = prospectivePrompt.responseText.replace(
-		// 	/\r|\n/,
-		// 	'<br>'
-		// );
-		// console.log('finalPrompt', finalPrompt);
-		// if (finalPrompt != null) {
-		// 	setSuperprompt(finalPrompt);
-		// }
-	}
+	const applyImprovedPrompt = () => {
+		if (improvedPrompt) {
+			setSuperprompt(improvedPrompt);
+			setIsOpen(false);
+		}
+	};
+
 	return (
-		<button
-			className={classNames(
-				active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-				'px-4 py-2 text-sm w-full flex items-center justify-start',
-			)}
-			onClick={runPromptCritic}
-		>
-			<SparklesIcon className="inline w-4 h-4 mr-2" />
-			PromptCritic (alpha)
-		</button>
-	);
-}
+		<>
+			<button
+				className={`px-4 py-2 text-sm w-full flex items-center justify-start ${
+					active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+				}`}
+				onClick={handleOpen}
+			>
+				<SparklesIcon className="inline w-4 h-4 mr-2 text-yellow-500" />
+				PromptCritic
+			</button>
 
-// https://tailwindui.com/components/application-ui/elements/dropdowns
-function classNames(...classes: string[]) {
-	return classes.filter(Boolean).join(' ');
+			<Dialog open={isOpen} onOpenChange={setIsOpen}>
+				<DialogContent className="max-w-2xl bg-white text-gray-900">
+					<DialogHeader>
+						<DialogTitle className="flex items-center text-lg font-bold">
+							<SparklesIcon className="w-5 h-5 mr-2 text-yellow-500" />
+							PromptCritic Analysis & Optimizer
+						</DialogTitle>
+					</DialogHeader>
+
+					<div className="space-y-4 py-2">
+						<div>
+							<label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+								Current Prompt
+							</label>
+							<div className="p-3 bg-gray-50 rounded-md border text-sm font-mono text-gray-800 max-h-28 overflow-y-auto">
+								{superprompt || '(No prompt entered)'}
+							</div>
+						</div>
+
+						{error && (
+							<div className="p-2.5 bg-red-50 text-red-700 rounded-md text-xs">
+								{error}
+							</div>
+						)}
+
+						{loading ? (
+							<div className="flex flex-col items-center justify-center p-8 space-y-2 text-gray-500">
+								<div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+								<span className="text-sm">Analyzing prompt with AI...</span>
+							</div>
+						) : analysis ? (
+							<div className="space-y-3">
+								<div>
+									<label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+										AI Feedback & Improvements
+									</label>
+									<div className="p-3 bg-indigo-50 border border-indigo-100 rounded-md text-sm text-gray-800 whitespace-pre-wrap max-h-48 overflow-y-auto leading-relaxed">
+										{analysis}
+									</div>
+								</div>
+
+								<div>
+									<label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+										Edit & Apply Optimized Prompt
+									</label>
+									<textarea
+										rows={4}
+										value={improvedPrompt}
+										onChange={(e) => setImprovedPrompt(e.target.value)}
+										className="w-full p-2.5 text-sm font-mono border rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+										placeholder="Edit the improved prompt here..."
+									/>
+								</div>
+							</div>
+						) : null}
+
+						<div className="flex justify-end space-x-2 pt-2 border-t">
+							<Button variant="outline" onClick={() => setIsOpen(false)}>
+								Cancel
+							</Button>
+							{!analysis && !loading && (
+								<Button
+									onClick={() => runAnalysis(superprompt)}
+									className="bg-indigo-600 text-white hover:bg-indigo-700"
+								>
+									Run Analysis
+								</Button>
+							)}
+							{analysis && (
+								<Button
+									onClick={applyImprovedPrompt}
+									className="bg-indigo-600 text-white hover:bg-indigo-700"
+								>
+									Apply to Superprompt
+								</Button>
+							)}
+						</div>
+					</div>
+				</DialogContent>
+			</Dialog>
+		</>
+	);
 }

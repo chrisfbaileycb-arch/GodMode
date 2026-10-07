@@ -72,7 +72,6 @@ export function BrowserPane({
 			result.destination.index,
 		) as paneInfo[];
 		setPaneList(reorderedItems);
-		window.electron.browserWindow.reload();
 	}
 	// Normally you would want to split things out into separate components.
 	// But in this example everything is just done in one place for simplicity
@@ -132,7 +131,6 @@ export function BrowserPane({
 																		pane.webviewId !== item.webviewId,
 																),
 															);
-															window.electron.browserWindow.reload();
 														};
 														return (
 															<div
@@ -200,7 +198,6 @@ export function BrowserPane({
 																		shortName: value.shortName,
 																	},
 																]);
-																window.electron.browserWindow.reload();
 															}
 														}}
 													/>

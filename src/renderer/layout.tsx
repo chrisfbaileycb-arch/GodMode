@@ -5,7 +5,6 @@ import Pane from 'components/pane';
 import { allProviders } from 'lib/constants';
 import React from 'react';
 import Split from 'react-split';
-import 'tailwindcss/tailwind.css';
 import { CmdOrCtrlKey, getEnabledProviders } from 'lib/utils';
 import './App.css';
 import { BrowserPane } from './browserPane';
@@ -47,6 +46,7 @@ export default function Layout() {
 
 	React.useEffect(() => {
 		window.electron.electronStore.set('paneList', paneList);
+		setSizes(updateSplitSizes(enabledProviders));
 	}, [paneList]);
 
 	const resetPaneList = () => setPaneList(defaultPaneList);
@@ -85,8 +85,18 @@ export default function Layout() {
 	);
 
 	function submitProviders() {
+		if (!superprompt.trim()) return;
+		window.dispatchEvent(
+			new CustomEvent('godmode-superprompt-submit', {
+				detail: { prompt: superprompt },
+			}),
+		);
 		enabledProviders.forEach((provider) => {
-			provider.handleSubmit(superprompt);
+			try {
+				provider.handleSubmit(superprompt);
+			} catch (err) {
+				console.debug('provider handleSubmit err', err);
+			}
 		});
 	}
 

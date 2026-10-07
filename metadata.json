@@ -1,0 +1,8 @@
+{
+  "name": "GodMode Web",
+  "description": "Simultaneously chat with ChatGPT, Claude, Gemini, Perplexity, Llama and more in a multi-pane browser interface.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
