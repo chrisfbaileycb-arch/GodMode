@@ -1,11 +1,11 @@
-const colors = require('tailwindcss/colors');
+import colors from 'tailwindcss/colors.js';
 
-module.exports = {
+export default {
 	content: [
 		'./src/renderer/**/*.{js,jsx,ts,tsx,ejs}',
 		'./src/components/**/*.{js,jsx,ts,tsx,ejs}',
 	],
-	darkMode: 'media', // or 'class'
+	darkMode: 'class',
 	theme: {
 		extend: {
 			colors: {
@@ -13,9 +13,6 @@ module.exports = {
 				cyan: colors.cyan,
 			},
 		},
-	},
-	variants: {
-		extend: {},
 	},
 	plugins: [],
 };

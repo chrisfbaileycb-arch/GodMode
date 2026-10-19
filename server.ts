@@ -7,8 +7,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
-const HOST = '0.0.0.0';
+const args = process.argv.slice(2);
+const portArgIndex = args.indexOf('--port');
+const portFromArgs = portArgIndex !== -1 ? Number(args[portArgIndex + 1]) : null;
+const hostArgIndex = args.indexOf('--host');
+const hostFromArgs = hostArgIndex !== -1 ? args[hostArgIndex + 1] : null;
+
+const PORT = portFromArgs || Number(process.env.PORT) || 3000;
+const HOST = hostFromArgs || process.env.HOST || '0.0.0.0';
 
 app.use(express.json());
 
@@ -132,7 +138,11 @@ async function startServer() {
 	if (!isProduction) {
 		const { createServer: createViteServer } = await import('vite');
 		const vite = await createViteServer({
-			server: { middlewareMode: true },
+			server: {
+				middlewareMode: true,
+				allowedHosts: true,
+				hmr: false,
+			},
 			appType: 'spa',
 		});
 		app.use(vite.middlewares);
@@ -144,7 +154,8 @@ async function startServer() {
 	}
 
 	app.listen(PORT, HOST, () => {
-		console.log(`GodMode Web running on http://${HOST}:${PORT}`);
+		console.log(`\n  ➜  Local:   http://localhost:${PORT}/`);
+		console.log(`  ➜  Network: http://${HOST}:${PORT}/\n`);
 	});
 }
 
